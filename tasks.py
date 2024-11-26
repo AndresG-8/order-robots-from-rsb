@@ -1,5 +1,5 @@
 from robocorp.tasks import task
-from robocorp import browser, vault, storage
+from robocorp import browser
 from RPA.HTTP import HTTP
 from RPA.Tables import Tables
 from RPA.PDF import PDF
@@ -19,16 +19,13 @@ def order_robots_from_RobotSpareBin():
     browser.configure(
         slowmo=100
     )
-    robot_order_asset = storage.get_json("rsb_assets")
-    ##log_in(robot_order_asset["rsb_home_url"])
-    open_robot_order_website(robot_order_asset["rsb_robot_order"])
-    download_orders_file(robot_order_asset["rsb_orders_file"])
+    open_robot_order_website()
+    download_orders_file()
     
     close_annoying_modal()
     
     orders = get_orders()
     for row in orders:
-        print(row)
         fill_the_form(row)
         pdf_file_path = store_receipt_as_pdf(row['Order number'])
         screenshot_path = screenshot_robot(row['Order number'])
@@ -38,21 +35,12 @@ def order_robots_from_RobotSpareBin():
 
     archive_receipts()
 
-    
-def log_in(url):
-    page = browser.page()
-    account = vault.get_secret("robotsparebin", True)
-    page.goto(url)
-    page.fill("#username", account['rsb_username'])
-    page.fill("#password", account['rsb_password'])
-    page.click("button:text('Log in')")
+def open_robot_order_website():
+    browser.goto("https://robotsparebinindustries.com/#/robot-order")
 
-def open_robot_order_website(url):
-    browser.goto(url)
-
-def download_orders_file(url):
+def download_orders_file():
     http = HTTP()
-    http.download(url=url, overwrite=True)
+    http.download(url="https://robotsparebinindustries.com/orders.csv", overwrite=True)
 
 def get_orders():
     table = Tables()
@@ -70,19 +58,17 @@ def fill_the_form(row):
     page.locator("xpath=//div[@id='root']/div/div/div/div/form/div[3]/input").fill(row['Legs'])
     page.fill("#address", row['Address'])
     page.click("#order")
-    #review if error on submitting
+    
     while True:    
         try:
             page.wait_for_selector(selector="#order-another", timeout=1000)
         except:
             try:
-                print("Trying to get the alert message about server error")
-                # page.locator(".alert").wait_for()
                 page.click("#order")
             except Exception as e:
                 print(f"can't click over button or not previous error, {e.message}")
         else:
-            print("Nothing went wrong, continue")
+            #print("Nothing went wrong, continue")
             break
 
 def store_receipt_as_pdf(order_number):
@@ -115,7 +101,6 @@ def archive_receipts():
     temp_folder = Path('output/temp_folder/')
     archive_file_path = Path('output/Compressed_files.zip')
 
-    #parents=True: create any misssing parents of this path
     temp_folder.mkdir(parents=True, exist_ok=True)
     for item in temp_folder.iterdir():
         if item.is_dir():
