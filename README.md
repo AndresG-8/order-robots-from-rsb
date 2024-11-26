@@ -1,6 +1,14 @@
-# Template: Python - Minimal
+# order-robot-from-rsb
+Robot created with Robocorp in level II certification
 
-This template leverages the new [Python framework](https://github.com/robocorp/robocorp), the [libraries](https://github.com/robocorp/robocorp/blob/master/docs/README.md#python-libraries) from to same project as well.
+## What the robot do
+1. Orders robots from RobotSpareBin Industries Inc.
+1. Saves the order HTML receipt as a PDF file.
+1. Saves the screenshot of the ordered robot.
+1. Embeds the screenshot of the robot to the PDF receipt.
+1. Creates ZIP archive of the receipts and the images.
+
+This is made based on a template leverages the new [Python framework](https://github.com/robocorp/robocorp), the [libraries](https://github.com/robocorp/robocorp/blob/master/docs/README.md#python-libraries) from to same project as well.
 
 The template provides you with the basic structure of a Python project: logging out of the box and controlling your tasks without fiddling with the base Python stuff. The environment contains the most used libraries, so you do not have to start thinking about those right away. 
 

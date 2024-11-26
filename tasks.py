@@ -1,5 +1,5 @@
 from robocorp.tasks import task
-from robocorp import browser
+from robocorp import browser, vault, storage
 from RPA.HTTP import HTTP
 from RPA.Tables import Tables
 from RPA.PDF import PDF
@@ -19,9 +19,10 @@ def order_robots_from_RobotSpareBin():
     browser.configure(
         slowmo=100
     )
-    
-    open_robot_order_website()
-    download_orders_file()
+    robot_order_asset = storage.get_json("rsb_assets")
+    ##log_in(robot_order_asset["rsb_home_url"])
+    open_robot_order_website(robot_order_asset["rsb_robot_order"])
+    download_orders_file(robot_order_asset["rsb_orders_file"])
     
     close_annoying_modal()
     
@@ -37,13 +38,21 @@ def order_robots_from_RobotSpareBin():
 
     archive_receipts()
 
+    
+def log_in(url):
+    page = browser.page()
+    account = vault.get_secret("robotsparebin", True)
+    page.goto(url)
+    page.fill("#username", account['rsb_username'])
+    page.fill("#password", account['rsb_password'])
+    page.click("button:text('Log in')")
 
-def open_robot_order_website():
-    browser.goto("https://robotsparebinindustries.com/#/robot-order")
+def open_robot_order_website(url):
+    browser.goto(url)
 
-def download_orders_file():
+def download_orders_file(url):
     http = HTTP()
-    http.download(url="https://robotsparebinindustries.com/orders.csv", overwrite=True)
+    http.download(url=url, overwrite=True)
 
 def get_orders():
     table = Tables()
